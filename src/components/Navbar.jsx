@@ -14,15 +14,15 @@ const Navbar = ({ toggleDarkMode, darkMode }) => {
   };
 
   return (
-    <div className="navbar bg-gradient-to-r from-primary to-secondary text-primary-content shadow-xl sticky top-0 z-50">
+    <div className="navbar bg-primary text-primary-content shadow-lg sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
-        <Link to="/" className="text-3xl font-extrabold tracking-tight">Zag's Blog</Link>
+        <Link to="/" className="text-3xl font-bold">Zag's Blog</Link>
         <div className="flex items-center space-x-4">
           {user ? (
             <>
               <span className="text-sm font-medium">Welcome, {user.username}</span>
-              <Link to="/add-post" className="btn btn-success btn-sm rounded-full">+ New Post</Link>
-              <button onClick={handleLogout} className="btn btn-error btn-sm rounded-full">Logout</button>
+              <Link to="/add-post" className="btn btn-success btn-sm rounded">+ New Post</Link>
+              <button onClick={handleLogout} className="btn btn-error btn-sm rounded">Logout</button>
             </>
           ) : (
             <>
@@ -30,7 +30,7 @@ const Navbar = ({ toggleDarkMode, darkMode }) => {
               <Link to="/signup" className="btn btn-ghost btn-sm">Signup</Link>
             </>
           )}
-          <button onClick={toggleDarkMode} className="btn btn-outline btn-sm rounded-full">
+          <button onClick={toggleDarkMode} className="btn btn-outline btn-sm rounded">
             {darkMode ? 'Light' : 'Dark'}
           </button>
         </div>
