@@ -8,7 +8,9 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
+    const storedDarkMode = localStorage.getItem('darkMode');
     if (storedUser) setUser(JSON.parse(storedUser));
+    if (storedDarkMode) setDarkMode(JSON.parse(storedDarkMode));
   }, []);
 
   useEffect(() => {
@@ -19,12 +21,13 @@ export const AuthProvider = ({ children }) => {
       document.documentElement.setAttribute('data-theme', 'cupcake');
       document.documentElement.classList.remove('dark');
     }
-    localStorage.setItem('darkMode', darkMode);
+    localStorage.setItem('darkMode', JSON.stringify(darkMode));
   }, [darkMode]);
 
-  const login = (userData) => {
+  const login = (userData, token) => {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('token', token);
   };
 
   const logout = () => {

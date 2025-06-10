@@ -78,10 +78,11 @@ const Home = () => {
                   type="text"
                   placeholder="Search posts..."
                   className="input input-bordered w-full rounded-full"
-                  value={search}
+                  value={search
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
+              
               <div className="form-control">
                 <select
                   className="select select-bordered rounded-full"

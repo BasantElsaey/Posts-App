@@ -1,44 +1,36 @@
-import React, { useState } from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 import api from '../services/api';
+import { AuthContext } from '../contexts/AuthContext';
 
-const Signup = ({ setUser }) => {
+const Signup = () => {
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+
+  const validationSchema = Yup.object({
+    username: Yup.string().required('Username is required').min(3, 'Username too short'),
+    email: Yup.string().email('Invalid email').required('Email is required'),
+    password: Yup.string().required('Password is required').min(6, 'Password must be at least 6 characters'),
+    confirmPassword: Yup.string().oneOf([Yup.ref('password'), null], 'Passwords must match').required('Confirm Password is required'),
   });
-  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
-    setLoading(true);
+  const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const response = await api.post('/register', {
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
+        username: values.username,
+        email: values.email,
+        password: values.password,
       });
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      setUser(response.data.user);
-      toast.success('Signed up successfully');
+      login(response.data.user, response.data.token);
+      toast.success('Signed up successfully!');
       navigate('/');
     } catch (error) {
       toast.error('Error signing up');
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -46,67 +38,67 @@ const Signup = ({ setUser }) => {
     <div className="container mx-auto p-6 max-w-md">
       <h1 className="text-4xl font-extrabold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">Signup</h1>
       <div className="card bg-base-100 shadow-2xl p-8 animate-slide-up">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text text-lg font-semibold">Username</span>
-            </label>
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              className="input input-bordered w-full rounded-lg"
-              required
-            />
-          </div>
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text text-lg font-semibold">Email</span>
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="input input-bordered w-full rounded-lg"
-              required
-            />
-          </div>
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text text-lg font-semibold">Password</span>
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="input input-bordered w-full rounded-lg"
-              required
-            />
-          </div>
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text text-lg font-semibold">Confirm Password</span>
-            </label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="input input-bordered w-full rounded-lg"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className={`btn btn-primary w-full rounded-lg ${loading ? 'loading' : ''}`}
-            disabled={loading}
-          >
-            {loading ? 'Signing up...' : 'Signup'}
-          </button>
-        </form>
+        <Formik
+          initialValues={{ username: '', email: '', password: '', confirmPassword: '' }}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ isSubmitting }) => (
+            <Form className="space-y-6">
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text text-lg font-semibold">Username</span>
+                </label>
+                <Field
+                  type="text"
+                  name="username"
+                  className="input input-bordered w-full rounded-lg"
+                />
+                <ErrorMessage name="username" component="div" className="text-error text-sm mb-2" />
+              </div>
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text text-lg font-semibold">Email</span>
+                </label>
+                <Field
+                  type="email"
+                  name="email"
+                  className="input input-bordered w-full rounded-lg"
+                />
+                <ErrorMessage name="email" component="div" className="text-error text-sm mb-2" />
+              </div>
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text text-lg font-semibold">Password</span>
+                </label>
+                <Field
+                  type="password"
+                  name="password"
+                  className="input input-bordered w-full rounded-lg"
+                />
+                <ErrorMessage name="password" component="div" className="text-error text-sm mb-2" />
+              </div>
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text text-lg font-semibold">Confirm Password</span>
+                </label>
+                <Field
+                  type="password"
+                  name="confirmPassword"
+                  className="input input-bordered w-full rounded-lg"
+                />
+                <ErrorMessage name="confirmPassword" component="div" className="text-error text-sm mb-2" />
+              </div>
+              <button
+                type="submit"
+                className={`btn btn-primary w-full rounded-lg ${isSubmitting ? 'loading' : ''}`}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Signing up...' : 'Signup'}
+              </button>
+            </Form>
+          )}
+        </Formik>
       </div>
     </div>
   );
