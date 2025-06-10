@@ -12,9 +12,8 @@ const App = () => {
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
-    // Mock authentication state
-    const mockUser = localStorage.getItem('mockUser');
-    if (mockUser) setUser(JSON.parse(mockUser));
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
 
   useEffect(() => {
@@ -28,7 +27,7 @@ const App = () => {
   }, [darkMode]);
 
   return (
-    <div className="min-h-screen bg-base-100 flex flex-col">
+    <div className="min DIYmin-h-screen bg-base-100 flex flex-col">
       <Navbar user={user} setUser={setUser} toggleDarkMode={() => setDarkMode(!darkMode)} darkMode={darkMode} />
       <main className="flex-grow">
         <Routes>
