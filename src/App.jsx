@@ -21,13 +21,13 @@ const App = () => {
       document.documentElement.setAttribute('data-theme', 'dark');
       document.documentElement.classList.add('dark');
     } else {
-      document.documentElement.setAttribute('data-theme', 'light');
+      document.documentElement.setAttribute('data-theme', 'cupcake');
       document.documentElement.classList.remove('dark');
     }
   }, [darkMode]);
 
   return (
-    <div className="min DIYmin-h-screen bg-base-100 flex flex-col">
+    <div className="min-h-screen bg-base-100 flex flex-col">
       <Navbar user={user} setUser={setUser} toggleDarkMode={() => setDarkMode(!darkMode)} darkMode={darkMode} />
       <main className="flex-grow">
         <Routes>

@@ -1,0 +1,19 @@
+{
+  "posts": [
+    {
+      "id": 1,
+      "title": "Exploring Nature",
+      "imageUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+      "description": "A journey through the serene beauty of nature, capturing the essence of untouched landscapes.",
+      "userId": 1
+    },
+    {
+      "id": 2,
+      "title": "City Adventures",
+      "imageUrl": "https://images.unsplash.com/photo-1516321310760-779a4b7f0113",
+      "description": "Discovering the vibrant culture and hidden gems of urban life in bustling cities.",
+      "userId": 1
+    }
+  ],
+  "users": []
+}

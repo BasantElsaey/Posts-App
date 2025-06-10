@@ -5,23 +5,28 @@ import { toast } from 'react-toastify';
 const Navbar = ({ user, setUser, toggleDarkMode, darkMode }) => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('mockUser');
-    toast.success('Logged out successfully');
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setUser(null);
+      toast.success('Logged out successfully');
+      navigate('/login');
+    } catch (error) {
+      toast.error('Error logging out');
+    }
   };
 
   return (
-    <div className="navbar bg-primary text-primary-content shadow-lg">
+    <div className="navbar bg-gradient-to-r from-primary to-secondary text-primary-content shadow-xl sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold">Blog System</Link>
+        <Link to="/" className="text-3xl font-extrabold tracking-tight">Zag's Blog</Link>
         <div className="flex items-center space-x-4">
           {user ? (
             <>
-              <span className="text-sm">Welcome, {user.email}</span>
-              <Link to="/add-post" className="btn btn-success btn-sm">+ Add Post</Link>
-              <button onClick={handleLogout} className="btn btn-error btn-sm">Logout</button>
+              <span className="text-sm font-medium">Welcome, {user.username}</span>
+              <Link to="/add-post" className="btn btn-success btn-sm rounded-full">+ New Post</Link>
+              <button onClick={handleLogout} className="btn btn-error btn-sm rounded-full">Logout</button>
             </>
           ) : (
             <>
@@ -29,8 +34,8 @@ const Navbar = ({ user, setUser, toggleDarkMode, darkMode }) => {
               <Link to="/signup" className="btn btn-ghost btn-sm">Signup</Link>
             </>
           )}
-          <button onClick={toggleDarkMode} className="btn btn-outline btn-sm">
-            {darkMode ? 'Light Mode' : 'Dark Mode'}
+          <button onClick={toggleDarkMode} className="btn btn-outline btn-sm rounded-full">
+            {darkMode ? 'Light' : 'Dark'}
           </button>
         </div>
       </div>
