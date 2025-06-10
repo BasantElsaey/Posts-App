@@ -1,20 +1,16 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { AuthContext } from '../contexts/AuthContext';
 
-const Navbar = ({ user, setUser, toggleDarkMode, darkMode }) => {
+const Navbar = ({ toggleDarkMode, darkMode }) => {
+  const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    try {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      setUser(null);
-      toast.success('Logged out successfully');
-      navigate('/login');
-    } catch (error) {
-      toast.error('Error logging out');
-    }
+  const handleLogout = () => {
+    logout();
+    toast.success('Logged out successfully');
+    navigate('/login');
   };
 
   return (
