@@ -11,19 +11,29 @@ const Login = () => {
   const navigate = useNavigate();
 
   const validationSchema = Yup.object({
-    email: Yup.string().email('Invalid email').required('Email is required'),
-    password: Yup.string().required('Password is required').min(6, 'Password too short'),
+    email: Yup.string()
+      .email('Invalid email format')
+      .required('Email is required')
+      .lowercase('Email must be lowercase'), // Ensure lowercase for consistency
+    password: Yup.string()
+      .required('Password is required')
+      .min(6, 'Password must be at least 6 characters')
+      .max(50, 'Password is too long'),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      const response = await api.post('/login', values);
-      login(response.data.user, response.data.token);
-      toast.success('Logged in successfully! 🎉');
-      navigate('/');
+      const response = await api.get(`/users?email=${encodeURIComponent(values.email)}&password=${values.password}`);
+      if (response.data.length > 0) {
+        login(response.data[0], 'fake-token'); // Use fake token for now
+        toast.success('Logged in successfully! 🎉');
+        navigate('/');
+      } else {
+        toast.error('Invalid email or password 😞');
+      }
     } catch (error) {
-      toast.error('Invalid credentials 😞');
-      console.error(error);
+      console.error('Login error:', error.response ? error.response.data : error.message);
+      toast.error('Error logging in, please try again 😞');
     } finally {
       setSubmitting(false);
     }
@@ -51,7 +61,6 @@ const Login = () => {
         >
           {({ isSubmitting }) => (
             <Form className="space-y-6">
-              <div className Amend
               <div className="form-control relative">
                 <label className="label">
                   <span className="label-text">Email ✉️</span>

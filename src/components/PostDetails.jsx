@@ -1,73 +1,73 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useContext, useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../services/api';
 import { AuthContext } from '../contexts/AuthContext';
 import moment from 'moment';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
 
 const PostDetails = () => {
   const { user } = useContext(AuthContext);
   const { id } = useParams();
-  const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [commentText, setCommentText] = useState('');
+  const [users, setUsers] = useState([]);
+  const defaultImage = 'https://via.placeholder.com/800x600?text=Image+Not+Found';
 
   useEffect(() => {
-    const fetchPost = async () => {
+    const fetchData = async () => {
       try {
-        const response = await api.get(`/posts/${id}`);
-        setPost(response.data);
+        const [postResponse, usersResponse] = await Promise.all([
+          api.get(`/posts/${id}`),
+          api.get('/users'),
+        ]);
+        setPost(postResponse.data);
+        setUsers(usersResponse.data);
       } catch (error) {
-        toast.error('Error fetching post 😞');
-        console.error(error);
-        navigate('/');
+        toast.error('Error fetching post 😞', { autoClose: 5000 });
+        console.error('Fetch post error:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchPost();
-  }, [id, navigate]);
+    fetchData();
+  }, [id]);
 
-  const handleLike = async () => {
-    try {
-      await api.put(`/posts/${id}`, { ...post, likes: post.likes + 1 });
-      setPost({ ...post, likes: post.likes + 1 });
-      toast.success('Post liked! ❤️');
-    } catch (error) {
-      toast.error('Error liking post 😞');
-      console.error(error);
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error('Please log in to comment! 🔐', { autoClose: 5000 });
+      return;
     }
-  };
-
-  const handleShare = () => {
-    const shareUrl = `${window.location.origin}/post/${post.id}`;
-    navigator.clipboard.writeText(shareUrl);
-    toast.success('Link copied to clipboard! 📋');
-  };
-
-  const handleComment = async (values, { resetForm }) => {
+    if (!commentText.trim()) {
+      toast.error('Comment cannot be empty 😞', { autoClose: 5000 });
+      return;
+    }
     try {
       const newComment = {
-        content: values.comment,
+        id: Date.now().toString(),
         userId: user.id,
+        text: commentText,
         createdAt: new Date().toISOString(),
       };
-      const updatedComments = [...(post.comments || []), newComment];
-      await api.put(`/posts/${id}`, { ...post, comments: updatedComments });
-      setPost({ ...post, comments: updatedComments });
-      toast.success('Comment added! 💬');
-      resetForm();
+      const updatedPost = {
+        ...post,
+        comments: [...(post.comments || []), newComment],
+      };
+      await api.put(`/posts/${id}`, updatedPost);
+      setPost(updatedPost);
+      setCommentText('');
+      toast.success('Comment added successfully! 💬', { autoClose: 5000 });
     } catch (error) {
-      toast.error('Error adding comment 😞');
-      console.error(error);
+      toast.error('Error adding comment 😞', { autoClose: 5000 });
+      console.error('Comment error:', error);
     }
   };
 
-  const commentSchema = Yup.object({
-    comment: Yup.string().required('Comment is required').max(500, 'Comment too long'),
-  });
+  const getUsername = (userId) => {
+    const user = users.find((u) => u.id === userId);
+    return user ? user.username : `User ${userId}`;
+  };
 
   if (loading) {
     return (
@@ -76,103 +76,85 @@ const PostDetails = () => {
       </div>
     );
   }
-  if (!post) return null;
+
+  if (!post) {
+    return (
+      <div className="container mx-auto p-6 text-center">
+        <h2 className="text-2xl font-bold text-error">Post not found 😞</h2>
+        <Link to="/" className="btn btn-primary mt-4 rounded-full">
+          Back to Home 🏠
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <div className="card bg-base-100 shadow-2xl rounded-2xl overflow-hidden glass animate-slide-up">
+    <div className="container mx-auto p-6 min-h-screen bg-base-100">
+      <div className="card bg-base-100 shadow-2xl rounded-2xl p-8 glass max-w-4xl mx-auto animate-slide-up">
         <figure>
           <img
-            src={post.imageUrl}
+            src={post.imageUrl || defaultImage}
             alt={post.title}
-            className="w-full h-96 object-cover"
+            className="w-full h-96 object-cover rounded-t-2xl"
+            onError={(e) => (e.target.src = defaultImage)}
           />
         </figure>
-        <div className="card-body p-8">
-          <h1 className="card-title text-4xl font-extrabold mb-4 text-gradient font-poppins">
+        <div className="card-body">
+          <h2 className="card-title text-3xl font-extrabold text-gradient font-poppins">
             {post.title} 🌟
-          </h1>
-          <p className="text-base-content/70 mb-4">{post.description}</p>
-          <p className="text-sm font-medium text-primary">
-            By User {post.userId} 👤
-          </p>
+          </h2>
           <p className="text-sm text-base-content/60">
-            Posted: {moment(post.createdAt).format('MMM D, YYYY')} 📅
+            By {getUsername(post.userId)} 👤 | Posted: {moment(post.createdAt).format('MMM D, YYYY')} 📅
           </p>
-          <p className="text-sm text-base-content/60">
-            Last updated: {moment(post.updatedAt).format('MMM D, YYYY')} 🔄
-          </p>
-          <div className="flex items-center gap-4 mt-4">
-            <button
-              onClick={handleLike}
-              className="btn btn-ghost btn-sm hover:bg-primary/10"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-              </svg>
-              {post.likes} ❤️
-            </button>
-            <button
-              onClick={handleShare}
-              className="btn btn-ghost btn-sm hover:bg-primary/10"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z" />
-              </svg>
-              Share 📤
-            </button>
+          <p className="text-lg text-base-content/80 mt-4">{post.description}</p>
+          <div className="mt-4">
+            <span className="badge badge-primary badge-lg">{post.category}</span>
           </div>
-          {user && (
-            <div className="mt-8">
-              <h3 className="text-2xl font-bold mb-4 text-gradient font-poppins">
-                Comments 💬
-              </h3>
-              <Formik
-                initialValues={{ comment: '' }}
-                validationSchema={commentSchema}
-                onSubmit={handleComment}
-              >
-                <Form className="form-control">
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-                      💭
-                    </span>
-                    <Field
-                      as="textarea"
-                      name="comment"
-                      className="textarea textarea-bordered w-full rounded-lg pl-10 focus:ring-2 focus:ring-primary transition-all duration-200"
-                      placeholder="Add a comment..."
-                    />
-                  </div>
-                  <ErrorMessage
-                    name="comment"
-                    component="div"
-                    className="text-error text-sm mt-2"
-                  />
-                  <button
-                    type="submit"
-                    className="btn btn-primary rounded-full mt-2 hover:scale-105 transition-transform duration-200"
-                  >
-                    Post Comment 🚀
-                  </button>
-                </Form>
-              </Formik>
-              <div className="mt-6 space-y-4">
-                {(post.comments || []).map((comment, index) => (
-                  <div
-                    key={index}
-                    className="card bg-base-200 p-4 rounded-lg glass"
-                  >
-                    <p className="text-base-content">{comment.content}</p>
+          <div className="mt-6">
+            <h3 className="text-2xl font-bold mb-4 text-gradient font-poppins">Comments 💬</h3>
+            {post.comments && post.comments.length > 0 ? (
+              <div className="space-y-4">
+                {post.comments.map((comment) => (
+                  <div key={comment.id} className="border-l-4 border-primary pl-4">
                     <p className="text-sm text-base-content/60">
-                      By User {comment.userId} on{' '}
-                      {moment(comment.createdAt).format('MMM D, YYYY')} 👤
+                      {getUsername(comment.userId)} | {moment(comment.createdAt).format('MMM D, YYYY')}
                     </p>
+                    <p className="text-base-content">{comment.text}</p>
                   </div>
                 ))}
               </div>
-            </div>
+            ) : (
+              <p className="text-base-content/70">No comments yet. Be the first to comment! 💬</p>
+            )}
+          </div>
+          {user && (
+            <form onSubmit={handleCommentSubmit} className="mt-6 space-y-4">
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Add a Comment ✍️</span>
+                </label>
+                <textarea
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  className="textarea textarea-bordered w-full rounded-2xl focus:ring-2 focus:ring-primary"
+                  placeholder="Write your comment..."
+                  rows="3"
+                />
+              </div>
+              <button
+                type="submit"
+                className="btn btn-primary rounded-full hover:scale-105 transition-transform"
+              >
+                Post Comment 🚀
+              </button>
+            </form>
           )}
+          <Link
+            to="/"
+            className="btn btn-secondary btn-sm mt-6 rounded-full hover:scale-105 transition-transform"
+          >
+            Back to Home 🏠
+          </Link>
         </div>
       </div>
     </div>

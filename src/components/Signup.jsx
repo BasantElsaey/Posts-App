@@ -11,20 +11,43 @@ const Signup = () => {
   const navigate = useNavigate();
 
   const validationSchema = Yup.object({
-    username: Yup.string().required('Username is required').max(20, 'Username too long'),
-    email: Yup.string().email('Invalid email').required('Email is required'),
-    password: Yup.string().required('Password is required').min(6, 'Password too short'),
+    username: Yup.string()
+      .required('Username is required')
+      .min(3, 'Username must be at least 3 characters')
+      .max(20, 'Username must be at most 20 characters')
+      .matches(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
+    email: Yup.string()
+      .email('Invalid email format')
+      .required('Email is required')
+      .lowercase('Email must be lowercase'),
+    password: Yup.string()
+      .required('Password is required')
+      .min(6, 'Password must be at least 6 characters')
+      .max(50, 'Password is too long')
+      .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+      .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
+      .matches(/[0-9]/, 'Password must contain at least one number')
+      .matches(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      const response = await api.post('/register', values);
-      login(response.data.user, response.data.token);
+      const checkUser = await api.get(`/users?email=${encodeURIComponent(values.email)}`);
+      if (checkUser.data.length > 0) {
+        toast.error('Email already exists 😞');
+        return;
+      }
+      const response = await api.post('/users', {
+        ...values,
+        role: 'user',
+        createdAt: new Date().toISOString()
+      });
+      login(response.data, 'fake-token');
       toast.success('Signed up successfully! 🎉');
       navigate('/');
     } catch (error) {
-      toast.error('Error signing up 😞');
-      console.error(error);
+      console.error('Signup error:', error.response ? error.response.data : error.message);
+      toast.error(error.response?.data?.error || 'Error signing up 😞');
     } finally {
       setSubmitting(false);
     }

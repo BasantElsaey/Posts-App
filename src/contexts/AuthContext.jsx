@@ -9,25 +9,23 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const storedDarkMode = localStorage.getItem('darkMode');
-    if (storedUser) setUser(JSON.parse(storedUser));
-    if (storedDarkMode) setDarkMode(JSON.parse(storedDarkMode));
-  }, []);
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.setAttribute('data-theme', 'cupcake');
-      document.documentElement.classList.remove('dark');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
     }
-    localStorage.setItem('darkMode', JSON.stringify(darkMode));
-  }, [darkMode]);
+    if (storedDarkMode) {
+      setDarkMode(JSON.parse(storedDarkMode));
+    }
+  }, []);
 
   const login = (userData, token) => {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('token', token);
+  };
+
+  const updateUser = (updatedUser) => {
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
   const logout = () => {
@@ -36,9 +34,22 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
   };
 
+  const isAdmin = () => {
+    return user && user.role.toLowerCase() === 'admin';
+  };
+
+  const toggleDarkMode = () => {
+    setDarkMode((prev) => {
+      const newDarkMode = !prev;
+      localStorage.setItem('darkMode', JSON.stringify(newDarkMode));
+      return newDarkMode;
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, darkMode, toggleDarkMode: () => setDarkMode(!darkMode) }}>
+    <AuthContext.Provider value={{ user, login, updateUser, logout, isAdmin, darkMode, toggleDarkMode }}>
       {children}
     </AuthContext.Provider>
   );
 };
+

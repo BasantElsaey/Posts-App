@@ -5,7 +5,7 @@ const Footer = () => {
     <footer className="footer footer-center p-10 bg-base-200 text-base-content rounded-t-xl mt-8">
       <div>
         <p className="font-bold">Zag's Blog © 2025 - All rights reserved</p>
-        <p>Built with ❤️ by Zagazig University Students</p>
+        <p>Built with ❤️ by Basant Elsaey</p>
       </div>
       <div className="grid grid-flow-col gap-4">
         <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="link link-hover">

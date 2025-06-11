@@ -1,20 +1,152 @@
 {
   "posts": [
     {
-      "id": 1,
-      "title": "Exploring Nature",
-      "imageUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
-      "description": "A journey through the serene beauty of nature, capturing the essence of untouched landscapes.",
-      "userId": 1
+      "id": "1",
+      "title": "Exploring the Mountains 🏔️",
+      "imageUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      "description": "A journey through the serene mountains with breathtaking views and thrilling adventures. Perfect for nature lovers! 🌲",
+      "category": "Travel",
+      "userId": 1,
+      "createdAt": "2025-06-01T10:00:00Z",
+      "updatedAt": "2025-06-01T10:00:00Z",
+      "likes": 9,
+      "comments": [
+        {
+          "id": 1,
+          "userId": 2,
+          "content": "Amazing views! 😍",
+          "createdAt": "2025-06-02T12:00:00Z"
+        }
+      ]
     },
     {
-      "id": 2,
-      "title": "City Adventures",
-      "imageUrl": "https://images.unsplash.com/photo-1516321310760-779a4b7f0113",
-      "description": "Discovering the vibrant culture and hidden gems of urban life in bustling cities.",
-      "userId": 1
+      "id": "2",
+      "title": "Latest Tech Trends 2025 💻",
+      "imageUrl": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      "description": "Discover the top tech innovations shaping the future, from AI to quantum computing. 🚀",
+      "category": "Tech",
+      "userId": 2,
+      "createdAt": "2025-06-03T14:00:00Z",
+      "updatedAt": "2025-06-03T14:00:00Z",
+      "likes": 8,
+      "comments": []
     },
-    
+    {
+      "id": "3",
+      "title": "Minimalist Lifestyle Tips 🌱",
+      "imageUrl": "https://theportablewife.com/wp-content/uploads/minimalist-lifestyle-tips-featured.jpg",
+      "description": "Learn how to simplify your life with practical minimalist tips for a clutter-free home. 🏡",
+      "category": "Lifestyle",
+      "userId": 1,
+      "createdAt": "2025-06-05T09:00:00Z",
+      "updatedAt": "2025-06-05T09:00:00Z",
+      "likes": 4,
+      "comments": []
+    },
+    {
+      "id": "20e8",
+      "title": "Outfit ",
+      "description": "This is an outfit for eid",
+      "imageUrl": "https://i.pinimg.com/originals/07/2a/b4/072ab44601cee12cc244a4b92d95f9b9.jpg",
+      "category": "Lifestyle",
+      "userId": "6ecf",
+      "createdAt": "2025-06-10T21:59:49.004Z",
+      "updatedAt": "2025-06-10T21:59:49.004Z",
+      "likes": 8,
+      "comments": [
+        {
+          "content": "This is amazing. I liked it",
+          "userId": "6ecf",
+          "createdAt": "2025-06-10T22:01:04.812Z"
+        }
+      ]
+    },
+    {
+      "id": "ebbd",
+      "title": "Watch ",
+      "description": "This is a gold watch , it's very high quality ",
+      "imageUrl": "https://www.sonatawatches.in/dw/image/v2/BKDD_PRD/on/demandware.static/-/Sites-titan-master-catalog/default/dwcc09c5fd/images/Sonata/Catalog/7987YM11W_1.jpg?sw=600&sh=600",
+      "category": "Lifestyle",
+      "userId": "6ecf",
+      "createdAt": "2025-06-10T22:27:26.323Z",
+      "updatedAt": "2025-06-10T22:27:26.323Z",
+      "likes": 3,
+      "comments": [
+        {
+          "content": "It's very nice.",
+          "userId": "6ecf",
+          "createdAt": "2025-06-10T22:53:56.264Z"
+        },
+        {
+          "id": "1749596917894",
+          "userId": "6ecf",
+          "text": "It's very nice and high quality",
+          "createdAt": "2025-06-10T23:08:37.894Z"
+        }
+      ]
+    },
+    {
+      "id": "2c47",
+      "title": "Flowers",
+      "description": "Beautiful Flowers if you wanna a colored one",
+      "imageUrl": "https://i.ibb.co/wNrbrJPn/flowers.webp",
+      "category": "Lifestyle",
+      "userId": "6ecf",
+      "createdAt": "2025-06-10T23:34:43.504Z",
+      "updatedAt": "2025-06-10T23:34:43.504Z",
+      "likes": 2,
+      "comments": []
+    }
   ],
-  "users": []
+  "users": [
+    {
+      "id": "1",
+      "email": "user1@example.com",
+      "password": "password123",
+      "username": "Traveler",
+      "role": "admin",
+      "createdAt": "2025-06-01T08:00:00Z"
+    },
+    {
+      "id": "2",
+      "email": "user2@example.com",
+      "password": "password456",
+      "username": "TechGuru",
+      "role": "user",
+      "createdAt": "2025-06-02T08:00:00Z"
+    },
+    {
+      "id": "9c6b",
+      "username": "Basant",
+      "email": "basantelsaey@gmail.com",
+      "password": "basant123"
+    },
+    {
+      "id": "d6fe",
+      "username": "Basant",
+      "email": "basantelsaey@gmail.com",
+      "password": "basant123"
+    },
+    {
+      "id": "4fce",
+      "username": "Basant",
+      "email": "basantelsaey@gmail.com",
+      "password": "basant123"
+    },
+    {
+      "id": "6ecf",
+      "username": "basant",
+      "email": "basantelsaey72@gmail.com",
+      "password": "basant123_B",
+      "role": "user",
+      "createdAt": "2025-06-10T21:46:11.329Z",
+      "updatedAt": "2025-06-11T00:04:39.479Z"
+    },
+    {
+      "id": "ca49",
+      "username": "Basant",
+      "email": "basantelsaey@gmail.com",
+      "password": "basant123"
+    }
+  ]
 }

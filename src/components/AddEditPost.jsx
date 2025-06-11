@@ -1,220 +1,224 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useContext, useEffect, useState } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import api from '../services/api';
-import { AuthContext } from '../contexts/AuthContext';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import api from '../services/api';
+import { AuthContext } from '../contexts/AuthContext';
+import axios from 'axios';
 
 const AddEditPost = () => {
   const { user } = useContext(AuthContext);
-  const navigate = useNavigate();
   const { id } = useParams();
-  const isEdit = !!id;
+  const navigate = useNavigate();
   const [initialValues, setInitialValues] = useState({
     title: '',
-    imageUrl: '',
     description: '',
+    imageUrl: '',
     category: 'Travel',
   });
   const [imagePreview, setImagePreview] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    if (isEdit) {
+    if (id) {
       const fetchPost = async () => {
         try {
           const response = await api.get(`/posts/${id}`);
-          setInitialValues(response.data);
-          setImagePreview(response.data.imageUrl);
+          setInitialValues({
+            title: response.data.title,
+            description: response.data.description,
+            imageUrl: response.data.imageUrl || '',
+            category: response.data.category,
+            createdAt: response.data.createdAt,
+            likes: response.data.likes,
+            comments: response.data.comments,
+          });
+          setImagePreview(response.data.imageUrl || '');
         } catch (error) {
-          toast.error('Error fetching post 😞');
-          console.error(error);
-          navigate('/');
+          toast.error('Error fetching post 😞', { autoClose: 5000 });
+          console.error('Fetch post error:', error);
         }
       };
       fetchPost();
     }
-  }, [id, navigate]);
+  }, [id]);
 
   const validationSchema = Yup.object({
-    title: Yup.string().required('Title is required').max(100, 'Title too long'),
-    imageUrl: Yup.string().url('Invalid URL').required('Image URL is required'),
-    description: Yup.string().required('Description is required').max(5000, 'Description too long'),
+    title: Yup.string()
+      .required('Title is required')
+      .min(3, 'Title too short')
+      .max(100, 'Title too long'),
+    description: Yup.string()
+      .required('Description is required')
+      .min(10, 'Description too short'),
+    imageUrl: Yup.string()
+      .url('Invalid URL')
+      .required('Image is required'),
     category: Yup.string().required('Category is required'),
   });
 
+  const handleImageUpload = async (event, setFieldValue) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (file.size > 32 * 1024 * 1024) {
+      toast.error('Image size exceeds 32MB limit 😞', { autoClose: 5000 });
+      return;
+    }
+
+    if (!import.meta.env.VITE_IMGBB_API_KEY) {
+      toast.error('ImgBB API key is missing. Please contact the administrator 😞', { autoClose: 5000 });
+      console.error('VITE_IMGBB_API_KEY is not defined in .env');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('key', import.meta.env.VITE_IMGBB_API_KEY);
+
+    try {
+      setUploading(true);
+      console.log('Uploading image with key:', import.meta.env.VITE_IMGBB_API_KEY);
+      const response = await axios.post('https://api.imgbb.com/1/upload', formData);
+      const imageUrl = response.data.data.url;
+      console.log('Image uploaded, URL:', imageUrl);
+      setFieldValue('imageUrl', imageUrl);
+      setImagePreview(imageUrl);
+      toast.success('Image uploaded successfully! 🖼️', { autoClose: 5000 });
+    } catch (error) {
+      toast.error('Error uploading image 😞', { autoClose: 5000 });
+      console.error('ImgBB upload error:', error.response ? error.response.data : error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (values, { setSubmitting }) => {
-    setLoading(true);
+    console.log('Submitting form with values:', values);
+    if (!values.imageUrl) {
+      toast.error('Please upload an image before submitting 😞', { autoClose: 5000 });
+      setSubmitting(false);
+      return;
+    }
     try {
       const postData = {
         ...values,
         userId: user.id,
-        createdAt: isEdit ? initialValues.createdAt : new Date().toISOString(),
+        createdAt: id ? values.createdAt : new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        likes: isEdit ? initialValues.likes || 0 : 0,
-        comments: isEdit ? initialValues.comments || [] : [],
+        likes: id ? values.likes : 0,
+        comments: id ? values.comments : [],
       };
-      if (isEdit) {
+      if (id) {
         await api.put(`/posts/${id}`, postData);
-        toast.success('Post updated successfully! 🎉');
+        toast.success('Post updated successfully! 🎉', { autoClose: 7000 });
       } else {
-        await api.post('/posts', postData);
-        toast.success('Post created successfully! 🎉');
+        await api.post(`/posts`, postData);
+        toast.success('Post created successfully! 🎉', { autoClose: 7000 });
       }
-      navigate('/');
+      setTimeout(() => navigate('/'), 5000);
     } catch (error) {
-      toast.error(`Error ${isEdit ? 'updating' : 'creating'} post 😞`);
-      console.error(error);
+      toast.error('Error saving post 😞', { autoClose: 5000 });
+      console.error('Save post error:', error);
     } finally {
-      setLoading(false);
       setSubmitting(false);
     }
   };
 
-  const handleImageChange = (e, setFieldValue) => {
-    const url = e.target.value;
-    setFieldValue('imageUrl', url);
-    setImagePreview(url);
-  };
-
-  const categories = ['Travel', 'Tech', 'Lifestyle'];
-
   if (!user) {
-    navigate('/login');
-    return null;
+    return (
+      <div className="container mx-auto p-6 text-center">
+        <h2 className="text-2xl font-bold text-error">Please log in to create a post 😞</h2>
+        <Link to="/login" className="btn btn-primary mt-4 rounded-full">Login 🔐</Link>
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto p-6 flex flex-col lg:flex-row gap-8 min-h-screen bg-base-100">
-      {/* Sidebar Quote Widget */}
-      <div className="hidden lg:block w-1/3">
-        <div className="card bg-base-200 shadow-xl rounded-2xl p-6 glass">
-          <h3 className="text-2xl font-bold text-center mb-4 text-gradient font-poppins">
-            Inspire Your Post! 🌈
-          </h3>
-          <p className="text-center italic">
-            "Write what should not be forgotten." — Isabel Allende 📝
-          </p>
-          <div className="mt-4 flex justify-center">
-            <img
-              src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"
-              alt="Inspiration"
-              className="rounded-full w-32 h-32 animate-pulse"
-            />
-          </div>
-        </div>
-      </div>
-      {/* Form */}
-      <div className="card bg-base-100 shadow-2xl rounded-2xl p-8 w-full max-w-2xl glass">
-        <h2 className "text-3xl font-extrabold text-center mb-6 text-gradient font-poppins">
-          {isEdit ? 'Edit Your Story 📝' : 'Create a New Post 🌟'}
+    <div className="container mx-auto p-6 min-h-screen bg-base-100">
+      <div className="card bg-base-100 shadow-xl rounded-2xl p-8 glass max-w-2xl mx-auto animate-slide-up">
+        <h2 className="text-3xl font-extrabold mb-6 text-center text-gradient font-poppins">
+          {id ? 'Edit Post 📝' : 'Create New Post 🌟'}
         </h2>
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
+          enableReinitialize
         >
           {({ isSubmitting, setFieldValue }) => (
             <Form className="space-y-6">
-              <div className="form-control relative">
+              <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Title 📜</span>
+                  <span className="label-text">Title ✍️</span>
                 </label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-                    ✨
-                  </span>
-                  <Field
-                    type="text"
-                    name="title"
-                    className="input input-bordered w-full rounded-full pl-10 focus:ring-2 focus:ring-primary transition-all duration-200"
-                    placeholder="Enter post title..."
-                  />
-                </div>
-                <ErrorMessage
+                <Field
+                  type="text"
                   name="title"
-                  component="div"
-                  className="text-error text-sm mt-1"
+                  className="input input-bordered w-full rounded-full focus:ring-2 focus:ring-primary"
+                  placeholder="Enter post title..."
                 />
+                <ErrorMessage name="title" component="div" className="text-error text-sm mt-1" />
               </div>
-              <div className="form-control relative">
+              <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Image URL 🖼️</span>
-                </label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-                    📸
-                  </span>
-                  <Field
-                    type="text"
-                    name="imageUrl"
-                    className="input input-bordered w-full rounded-full pl-10 focus:ring-2 focus:ring-primary transition-all duration-200"
-                    placeholder="Enter image URL..."
-                    onChange={(e) => handleImageChange(e, setFieldValue)}
-                  />
-                </div>
-                <ErrorMessage
-                  name="imageUrl"
-                  component="div"
-                  className="text-error text-sm mt-1"
-                />
-                {imagePreview && (
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="mt-4 w-full max-w-md h-48 object-cover rounded-lg shadow-md animate-slide-up"
-                  />
-                )}
-              </div>
-              <div className="form-control relative">
-                <label className="label">
-                  <span className="label-text">Description 📝</span>
+                  <span className="label-text">Description 📜</span>
                 </label>
                 <Field
                   as="textarea"
                   name="description"
-                  className="textarea textarea-bordered w-full rounded-lg h-40 focus:ring-2 focus:ring-primary transition-all duration-200"
-                  placeholder="Write your story..."
+                  className="textarea textarea-bordered w-full rounded-2xl focus:ring-2 focus:ring-primary"
+                  placeholder="Enter post description..."
+                  rows="5"
                 />
-                <ErrorMessage
-                  name="description"
-                  component="div"
-                  className="text-error text-sm mt-1"
-                />
+                <ErrorMessage name="description" component="div" className="text-error text-sm mt-1" />
               </div>
-              <div className="form-control relative">
+              <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Category 🌈</span>
+                  <span className="label-text">Image 🖼️</span>
                 </label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-                    🎨
-                  </span>
-                  <Field
-                    as="select"
-                    name="category"
-                    className="select select-bordered w-full rounded-full pl-10 focus:ring-2 focus:ring-primary transition-all duration-200"
-                  >
-                    {categories.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </Field>
-                </div>
-                <ErrorMessage
-                  name="category"
-                  component="div"
-                  className="text-error text-sm mt-1"
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => handleImageUpload(event, setFieldValue)}
+                  className="file-input file-input-bordered w-full rounded-full focus:ring-2 focus:ring-primary"
+                  disabled={uploading}
                 />
+                {uploading && <span className="loading loading-spinner text-primary mt-2"></span>}
+                {imagePreview && (
+                  <div className="mt-4">
+                    <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover rounded-lg" />
+                  </div>
+                )}
+                <Field
+                  type="hidden"
+                  name="imageUrl"
+                />
+                <ErrorMessage name="imageUrl" component="div" className="text-error text-sm mt-1" />
+              </div>
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Category 🏷️</span>
+                </label>
+                <Field
+                  as="select"
+                  name="category"
+                  className="select select-bordered w-full rounded-full focus:ring-2 focus:ring-primary"
+                >
+                  <option value="Travel">Travel ✈️</option>
+                  <option value="Tech">Tech 💻</option>
+                  <option value="Lifestyle">Lifestyle 🌿</option>
+                  <option value="Food">Food 🍽️</option>
+                </Field>
+                <ErrorMessage name="category" component="div" className="text-error text-sm mt-1" />
               </div>
               <button
                 type="submit"
-                className="btn btn-primary w-full rounded-full hover:scale-105 transition-transform duration-200"
-                disabled={isSubmitting || loading}
+                className="btn btn-primary w-full rounded-full hover:scale-105 transition-transform"
+                disabled={isSubmitting || uploading}
               >
-                {isSubmitting || loading ? 'Submitting...' : isEdit ? 'Update Post 📝' : 'Create Post 🚀'}
+                {isSubmitting ? 'Saving...' : id ? 'Update Post 🚀' : 'Create Post 🚀'}
               </button>
             </Form>
           )}
