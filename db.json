@@ -1,15 +1,12 @@
 {
   "posts": [
     {
-      "id": "1",
       "title": "Exploring the Mountains 🏔️",
-      "imageUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       "description": "A journey through the serene mountains with breathtaking views and thrilling adventures. Perfect for nature lovers! 🌲",
+      "imageUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       "category": "Travel",
-      "userId": 1,
       "createdAt": "2025-06-01T10:00:00Z",
-      "updatedAt": "2025-06-01T10:00:00Z",
-      "likes": 9,
+      "likes": 12,
       "comments": [
         {
           "id": 1,
@@ -17,31 +14,10 @@
           "content": "Amazing views! 😍",
           "createdAt": "2025-06-02T12:00:00Z"
         }
-      ]
-    },
-    {
-      "id": "2",
-      "title": "Latest Tech Trends 2025 💻",
-      "imageUrl": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      "description": "Discover the top tech innovations shaping the future, from AI to quantum computing. 🚀",
-      "category": "Tech",
-      "userId": 2,
-      "createdAt": "2025-06-03T14:00:00Z",
-      "updatedAt": "2025-06-03T14:00:00Z",
-      "likes": 8,
-      "comments": []
-    },
-    {
-      "id": "3",
-      "title": "Minimalist Lifestyle Tips 🌱",
-      "imageUrl": "https://theportablewife.com/wp-content/uploads/minimalist-lifestyle-tips-featured.jpg",
-      "description": "Learn how to simplify your life with practical minimalist tips for a clutter-free home. 🏡",
-      "category": "Lifestyle",
-      "userId": 1,
-      "createdAt": "2025-06-05T09:00:00Z",
-      "updatedAt": "2025-06-05T09:00:00Z",
-      "likes": 4,
-      "comments": []
+      ],
+      "userId": "1",
+      "updatedAt": "2025-06-11T00:15:05.811Z",
+      "id": "1"
     },
     {
       "id": "20e8",
@@ -52,7 +28,7 @@
       "userId": "6ecf",
       "createdAt": "2025-06-10T21:59:49.004Z",
       "updatedAt": "2025-06-10T21:59:49.004Z",
-      "likes": 8,
+      "likes": 11,
       "comments": [
         {
           "content": "This is amazing. I liked it",
@@ -70,7 +46,7 @@
       "userId": "6ecf",
       "createdAt": "2025-06-10T22:27:26.323Z",
       "updatedAt": "2025-06-10T22:27:26.323Z",
-      "likes": 3,
+      "likes": 4,
       "comments": [
         {
           "content": "It's very nice.",
@@ -94,8 +70,15 @@
       "userId": "6ecf",
       "createdAt": "2025-06-10T23:34:43.504Z",
       "updatedAt": "2025-06-10T23:34:43.504Z",
-      "likes": 2,
-      "comments": []
+      "likes": 6,
+      "comments": [
+        {
+          "id": "1749601122424",
+          "userId": "6ecf",
+          "text": "Amazing one.",
+          "createdAt": "2025-06-11T00:18:42.424Z"
+        }
+      ]
     }
   ],
   "users": [
@@ -140,7 +123,7 @@
       "password": "basant123_B",
       "role": "user",
       "createdAt": "2025-06-10T21:46:11.329Z",
-      "updatedAt": "2025-06-11T00:04:39.479Z"
+      "updatedAt": "2025-06-11T00:41:47.585Z"
     },
     {
       "id": "ca49",

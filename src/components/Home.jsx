@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../services/api';
 import { AuthContext } from '../contexts/AuthContext';
 import moment from 'moment';
 
 const Home = () => {
-  const { user, isAdmin } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -77,11 +78,12 @@ const Home = () => {
   }, [loading, filteredPosts.length, page]);
 
   const handleDelete = async (id) => {
-    if (!isAdmin()) {
-      toast.error('Only admins can delete posts! 🔐', { autoClose: 5000 });
-      return;
-    }
     try {
+      const post = posts.find((p) => p.id === id);
+      if (!user || post.userId !== user.id) {
+        toast.error('You can only delete your own posts! 🔐', { autoClose: 5000 });
+        return;
+      }
       await api.delete(`/posts/${id}`);
       setPosts(posts.filter((post) => post.id !== id));
       toast.success('Post deleted successfully ✅', { autoClose: 5000 });
@@ -92,9 +94,10 @@ const Home = () => {
   };
 
   const handleLike = async (e, id) => {
-    e.preventDefault(); 
+    e.preventDefault();
     if (!user) {
       toast.error('Please log in to like posts! 🔐', { autoClose: 5000 });
+      navigate('/login');
       return;
     }
     try {
@@ -127,13 +130,21 @@ const Home = () => {
 
   const getUsername = (userId) => {
     const user = users.find((u) => u.id === userId);
-    return user ? user.username : `User ${userId}`;
+    if (!user) {
+      console.warn(`User with ID ${userId} not found in users list`);
+      return `Unknown User`;
+    }
+    return user.username;
   };
+
+  const authors = useMemo(() => {
+    const validUsers = users.filter((u) => posts.some((p) => p.userId === u.id));
+    return ['all', ...validUsers.map((u) => u.id)];
+  }, [posts, users]);
 
   const paginatedPosts = filteredPosts.slice(0, page * postsPerPage);
 
   const categories = ['all', 'Travel', 'Tech', 'Lifestyle', 'Food'];
-  const authors = ['all', ...new Set(posts.map((post) => post.userId))];
 
   const suggestions = useMemo(() => {
     const terms = posts.flatMap((post) => [
@@ -177,12 +188,15 @@ const Home = () => {
             <p className="text-xl mb-8">
               Share your stories, explore new ideas, and connect with the world! ✈️💻📝
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <div className="relative w-full max-w-xs">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                  🔍
+                </span>
                 <input
                   type="text"
-                  placeholder="Search posts...🔎"
-                  className="input input-bordered w-50 max-w-xs rounded-full bg-white text-black pl-10 focus:ring-2 focus:ring-secondary"
+                  placeholder="Search posts... 🔎"
+                  className="input input-bordered w-full rounded-full bg-white text-black pl-10 focus:ring-2 focus:ring-secondary placeholder-custom"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   list="search-suggestions"
@@ -193,7 +207,7 @@ const Home = () => {
                   ))}
                 </datalist>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 justify-center">
                 {categories.map((cat) => (
                   <button
                     key={cat}
@@ -299,7 +313,7 @@ const Home = () => {
                   >
                     Read More 📖
                   </Link>
-                  {isAdmin() && (
+                  {user && post.userId === user.id && (
                     <div className="card-actions justify-end mt-4">
                       <Link
                         to={`/edit-post/${post.id}`}

@@ -1,15 +1,20 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
+import { AuthContext } from '../contexts/AuthContext';
 
-const Hero = ({ user }) => {
+const Hero = () => {
+  const { user } = useContext(AuthContext);
+
   return (
-    <div className="hero bg-base-200 rounded-lg p-10 mb-8 animate-fade-in">
+    <div className="hero min-h-[50vh] bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-2xl p-10 mb-8 animate-slide-up">
       <div className="hero-content text-center">
         <div className="max-w-md">
-          <h1 className="text-4xl font-bold">Welcome to Our Blog</h1>
-          <p className="py-6">Discover amazing stories and insights from Zag and our community.</p>
+          <h1 className="text-4xl font-extrabold font-poppins">Welcome to Zag's Blog 🌟</h1>
+          <p className="py-6 text-lg">Discover amazing stories and insights from our community! ✈️💻📝</p>
           {user && (
-            <Link to="/add-post" className="btn btn-primary">Create a New Post</Link>
+            <Link to="/add-post" className="btn btn-primary btn-lg rounded-full hover:scale-105 transition-transform">
+              Create a New Post 🚀
+            </Link>
           )}
         </div>
       </div>

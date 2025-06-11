@@ -21,10 +21,20 @@ const AddEditPost = () => {
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
+    if (!user) {
+      toast.error('Please log in to access this page! 🔐', { autoClose: 5000 });
+      navigate('/login');
+      return;
+    }
     if (id) {
       const fetchPost = async () => {
         try {
           const response = await api.get(`/posts/${id}`);
+          if (response.data.userId !== user.id) {
+            toast.error('You can only edit your own posts! 🔐', { autoClose: 5000 });
+            navigate('/');
+            return;
+          }
           setInitialValues({
             title: response.data.title,
             description: response.data.description,
@@ -38,11 +48,12 @@ const AddEditPost = () => {
         } catch (error) {
           toast.error('Error fetching post 😞', { autoClose: 5000 });
           console.error('Fetch post error:', error);
+          navigate('/');
         }
       };
       fetchPost();
     }
-  }, [id]);
+  }, [id, user, navigate]);
 
   const validationSchema = Yup.object({
     title: Yup.string()
@@ -62,13 +73,13 @@ const AddEditPost = () => {
     const file = event.target.files[0];
     if (!file) return;
 
-    if (file.size > 32 * 1024 * 1024) {
-      toast.error('Image size exceeds 32MB limit 😞', { autoClose: 5000 });
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size exceeds 5MB limit 😞', { autoClose: 5000 });
       return;
     }
 
     if (!import.meta.env.VITE_IMGBB_API_KEY) {
-      toast.error('ImgBB API key is missing. Please contact the administrator 😞', { autoClose: 5000 });
+      toast.error('ImgBB API key is missing 😞', { autoClose: 5000 });
       console.error('VITE_IMGBB_API_KEY is not defined in .env');
       return;
     }
@@ -79,10 +90,8 @@ const AddEditPost = () => {
 
     try {
       setUploading(true);
-      console.log('Uploading image with key:', import.meta.env.VITE_IMGBB_API_KEY);
       const response = await axios.post('https://api.imgbb.com/1/upload', formData);
       const imageUrl = response.data.data.url;
-      console.log('Image uploaded, URL:', imageUrl);
       setFieldValue('imageUrl', imageUrl);
       setImagePreview(imageUrl);
       toast.success('Image uploaded successfully! 🖼️', { autoClose: 5000 });
@@ -95,7 +104,6 @@ const AddEditPost = () => {
   };
 
   const handleSubmit = async (values, { setSubmitting }) => {
-    console.log('Submitting form with values:', values);
     if (!values.imageUrl) {
       toast.error('Please upload an image before submitting 😞', { autoClose: 5000 });
       setSubmitting(false);
@@ -117,7 +125,7 @@ const AddEditPost = () => {
         await api.post(`/posts`, postData);
         toast.success('Post created successfully! 🎉', { autoClose: 7000 });
       }
-      setTimeout(() => navigate('/'), 5000);
+      setTimeout(() => navigate('/'), 7000);
     } catch (error) {
       toast.error('Error saving post 😞', { autoClose: 5000 });
       console.error('Save post error:', error);
@@ -127,12 +135,7 @@ const AddEditPost = () => {
   };
 
   if (!user) {
-    return (
-      <div className="container mx-auto p-6 text-center">
-        <h2 className="text-2xl font-bold text-error">Please log in to create a post 😞</h2>
-        <Link to="/login" className="btn btn-primary mt-4 rounded-full">Login 🔐</Link>
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -157,7 +160,7 @@ const AddEditPost = () => {
                   type="text"
                   name="title"
                   className="input input-bordered w-full rounded-full focus:ring-2 focus:ring-primary"
-                  placeholder="Enter post title..."
+                  placeholder="Enter post title... 📜"
                 />
                 <ErrorMessage name="title" component="div" className="text-error text-sm mt-1" />
               </div>
@@ -169,7 +172,7 @@ const AddEditPost = () => {
                   as="textarea"
                   name="description"
                   className="textarea textarea-bordered w-full rounded-2xl focus:ring-2 focus:ring-primary"
-                  placeholder="Enter post description..."
+                  placeholder="Write your story... 📝"
                   rows="5"
                 />
                 <ErrorMessage name="description" component="div" className="text-error text-sm mt-1" />
@@ -191,10 +194,6 @@ const AddEditPost = () => {
                     <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover rounded-lg" />
                   </div>
                 )}
-                <Field
-                  type="hidden"
-                  name="imageUrl"
-                />
                 <ErrorMessage name="imageUrl" component="div" className="text-error text-sm mt-1" />
               </div>
               <div className="form-control">

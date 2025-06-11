@@ -2,30 +2,29 @@ import React, { createContext, useState, useEffect } from 'react';
 
 export const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [darkMode, setDarkMode] = useState(false);
+export const AuthContextProvider = ({ children }) => {
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+  const [darkMode, setDarkMode] = useState(() => {
+    const savedTheme = localStorage.getItem('darkMode');
+    return savedTheme ? JSON.parse(savedTheme) : false;
+  });
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const storedDarkMode = localStorage.getItem('darkMode');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
     }
-    if (storedDarkMode) {
-      setDarkMode(JSON.parse(storedDarkMode));
-    }
-  }, []);
+    localStorage.setItem('darkMode', JSON.stringify(darkMode));
+  }, [darkMode]);
 
   const login = (userData, token) => {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('token', token);
-  };
-
-  const updateUser = (updatedUser) => {
-    setUser(updatedUser);
-    localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
   const logout = () => {
@@ -34,22 +33,24 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
   };
 
-  const isAdmin = () => {
-    return user && user.role.toLowerCase() === 'admin';
+  const updateUser = (updatedUser) => {
+    if (!updatedUser || !updatedUser.id) {
+      console.error('Invalid user data provided to updateUser:', updatedUser);
+      return;
+    }
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
   const toggleDarkMode = () => {
-    setDarkMode((prev) => {
-      const newDarkMode = !prev;
-      localStorage.setItem('darkMode', JSON.stringify(newDarkMode));
-      return newDarkMode;
-    });
+    setDarkMode((prev) => !prev);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, updateUser, logout, isAdmin, darkMode, toggleDarkMode }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, darkMode, toggleDarkMode }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
+export default AuthContextProvider;
