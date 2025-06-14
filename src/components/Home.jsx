@@ -161,7 +161,7 @@ const Home = () => {
       <div className="text-center mt-20">
         <h2 className="text-2xl font-bold text-error">Server Error 😞</h2>
         <p>{serverError}</p>
-        <p>Please ensure JSON Server is running (`npx json-server --watch mocks/db.json --port 3000`).</p>
+        <p>Please ensure JSON Server is running (`npx json-server --watch db.json --port 3000`).</p>
       </div>
     );
   }

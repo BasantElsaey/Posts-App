@@ -16,7 +16,7 @@ const Categories = () => {
         const response = await api.get('/posts');
         setPosts(response.data);
       } catch (error) {
-        toast.error('Error fetching posts 😞', { autoClose: 5000 });
+        toast.error('Error fetching posts 😞', { autoClose: 7000 });
         console.error(error);
       } finally {
         setLoading(false);
@@ -41,17 +41,17 @@ const Categories = () => {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-extrabold mb-8 text-center text-gradient font-poppins">
+    <div className="container mx-auto p-6 bg-base-100">
+      <h1 className="text-3xl font-extrabold mb-8 text-center text-base-content font-poppins">
         Explore Categories 🌈
       </h1>
       {categories.map((category) => (
         <div key={category} className="mb-12">
-          <h2 className="text-2xl font-bold mb-4 text-gray-800 font-poppins">
+          <h2 className="text-2xl font-bold mb-4 text-base-content font-poppins">
             {category} 🎯
           </h2>
           {categoryPosts[category].length === 0 ? (
-            <p className="text-center text-lg font-semibold text-base-content/70">
+            <p className="text-center text-lg font-semibold text-base-content">
               No posts in {category}. Be the first to share! 🚀
             </p>
           ) : (
@@ -59,7 +59,7 @@ const Categories = () => {
               {categoryPosts[category].map((post) => (
                 <div
                   key={post.id}
-                  className="card bg-base-100 shadow-xl rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300"
+                  className="card bg-base-200 shadow-xl rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300"
                 >
                   <figure>
                     <img
@@ -76,7 +76,7 @@ const Categories = () => {
                     >
                       {post.title} 🌟
                     </Link>
-                    <p className="text-base-content/70 text-sm line-clamp-2">{post.description}</p>
+                    <p className="text-base-content/80 text-sm line-clamp-2">{post.description}</p>
                     <p className="text-sm font-medium text-gray-600">
                       By User {post.userId} 👤
                     </p>

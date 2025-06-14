@@ -34,7 +34,7 @@ const Signup = () => {
     try {
       const checkUser = await api.get(`/users?email=${encodeURIComponent(values.email)}`);
       if (checkUser.data.length > 0) {
-        toast.error('Email already exists 😞');
+        toast.error('Email already exists 😞', { autoClose: 9000 });
         return;
       }
       const response = await api.post('/users', {
@@ -43,11 +43,11 @@ const Signup = () => {
         createdAt: new Date().toISOString()
       });
       login(response.data, 'fake-token');
-      toast.success('Signed up successfully! 🎉');
+      toast.success('Signed up successfully! 🎉', { autoClose: 9000 });
       navigate('/');
     } catch (error) {
       console.error('Signup error:', error.response ? error.response.data : error.message);
-      toast.error(error.response?.data?.error || 'Error signing up 😞');
+      toast.error(error.response?.data?.error || 'Error signing up 😞', { autoClose: 9000 });
     } finally {
       setSubmitting(false);
     }
@@ -55,7 +55,6 @@ const Signup = () => {
 
   return (
     <div className="container mx-auto p-6 flex flex-col lg:flex-row items-center gap-8 min-h-screen bg-base-100">
-      {/* Sidebar Illustration */}
       <div className="hidden lg:block w-1/2">
         <img
           src="https://images.unsplash.com/photo-1614624532983-4ce03382d63d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
@@ -63,7 +62,6 @@ const Signup = () => {
           className="rounded-2xl shadow-xl animate-float"
         />
       </div>
-      {/* Form */}
       <div className="card bg-base-100 shadow-2xl rounded-2xl p-8 w-full max-w-md glass">
         <h2 className="text-3xl font-extrabold text-center mb-6 text-gradient font-poppins">
           Join Zag's Blog! 🌟
