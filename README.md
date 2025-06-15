@@ -167,11 +167,46 @@ Open http://localhost:5173 in your browser.
 ├── README.md
 ├── vite.config.js
 ```
+## Screenshots 📷
+
+#### Home
+
+[![Home-Page.png](https://i.postimg.cc/PfPFyhSD/Home-Page.png)](https://postimg.cc/7brVYv8P)
+
+#### Signup
+
+[![Signup-page.png](https://i.postimg.cc/pXBGXTTg/Signup-page.png)](https://postimg.cc/mttNmT7w)
+
+#### Login
+
+[![login-page.png](https://i.postimg.cc/jS5Xx4B7/login-page.png)](https://postimg.cc/w7CJFLqq)
+
+#### Profile
+
+[![Profile-Zag.png](https://i.postimg.cc/L8MCmP2k/Profile-Zag.png)](https://postimg.cc/0bcdfb6r)
+
+#### Categories
+
+[![categories-foods-lifestyle.png](https://i.postimg.cc/8zjRQPrd/categories-foods-lifestyle.png)](https://postimg.cc/w1YyDz23)
+
+#### Form Post
+
+[![form-to-add-post.png](https://i.postimg.cc/5Nw0HcWc/form-to-add-post.png)](https://postimg.cc/yk8B5bNn)
+
+#### Product Details
+
+[![product-details.png](https://i.postimg.cc/N0dp8PTb/product-details.png)](https://postimg.cc/f30cDC80)
+
+#### Comments
+
+[![comments.png](https://i.postimg.cc/RhHdBSYb/comments.png)](https://postimg.cc/0K9DGsPp)
+
+------------------------------------------
 
 ### Deployment 🚀
-To deploy the app (e.g., to Netlify or Vercel):
+To deploy the app to Vercel
 ```bash
-Build the project:npm run build
+Build the project:npm run deploy
 ```
 - Deploy the dist folder to your hosting platform.
 

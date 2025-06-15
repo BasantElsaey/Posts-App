@@ -8,13 +8,14 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "server": "json-server --watch db.json --port 3000"
+    "server": "json-server --watch db.json --port 3000",
+    "start": "npm run dev",
+    "deploy": "concurrently \"npm run server\" \"npm run start\""
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.8",
     "axios": "^1.9.0",
     "body-parser": "^2.2.0",
-    "concurrently": "^9.1.2",
     "dotenv": "^16.5.0",
     "emoji-mart": "^5.6.0",
     "firebase": "^11.9.0",
@@ -36,6 +37,7 @@
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
+    "concurrently": "^9.1.2",
     "daisyui": "^5.0.43",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",

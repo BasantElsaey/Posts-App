@@ -28,7 +28,7 @@
       "userId": "6ecf",
       "createdAt": "2025-06-10T21:59:49.004Z",
       "updatedAt": "2025-06-10T21:59:49.004Z",
-      "likes": 14,
+      "likes": 16,
       "comments": [
         {
           "content": "This is amazing. I liked it",
@@ -52,6 +52,12 @@
           "username": "Mona_Ahmed",
           "text": "Nice!!!!!",
           "createdAt": "2025-06-15T17:00:15.691Z"
+        },
+        {
+          "id": "1750010796354",
+          "username": "Noura",
+          "text": "OMG!!!!",
+          "createdAt": "2025-06-15T18:06:36.354Z"
         }
       ]
     },
@@ -126,7 +132,14 @@
       "createdAt": "2025-06-13T18:41:22.015Z",
       "updatedAt": "2025-06-13T18:41:22.015Z",
       "likes": 0,
-      "comments": []
+      "comments": [
+        {
+          "id": "1750014062814",
+          "username": "mohamed",
+          "text": "OMG!!!!!",
+          "createdAt": "2025-06-15T19:01:02.814Z"
+        }
+      ]
     },
     {
       "id": "5697",
@@ -139,6 +152,18 @@
       "updatedAt": "2025-06-14T01:30:07.840Z",
       "likes": 0,
       "comments": []
+    },
+    {
+      "title": "Chicken Shawarma",
+      "description": "Middle Eastern wrap with marinated chicken, garlic sauce, pickles, and fries in pita bread.",
+      "imageUrl": "https://i.ibb.co/Pztc2Kbm/shawrma.jpg",
+      "category": "Food",
+      "createdAt": "2025-06-15T18:58:19.450Z",
+      "likes": 0,
+      "comments": [],
+      "userId": "9b2f",
+      "updatedAt": "2025-06-15T18:59:11.541Z",
+      "id": "9c77"
     }
   ],
   "users": [
@@ -215,6 +240,23 @@
       "role": "user",
       "createdAt": "2025-06-14T03:27:25.323Z",
       "updatedAt": "2025-06-15T17:44:57.375Z"
+    },
+    {
+      "id": "05d6",
+      "username": "Noura",
+      "email": "noura@gmail.com",
+      "password": "anshdaDS1QW2132434354%",
+      "role": "user",
+      "createdAt": "2025-06-15T18:06:25.398Z",
+      "updatedAt": "2025-06-15T18:07:58.207Z"
+    },
+    {
+      "id": "9b2f",
+      "username": "mohamed",
+      "email": "mohamedahmed@gmail.com",
+      "password": "mohamedahmed1234_M",
+      "role": "user",
+      "createdAt": "2025-06-15T18:52:22.491Z"
     }
   ]
 }
