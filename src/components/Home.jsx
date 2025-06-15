@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useMemo } from 'react';
+import React, { useState, useEffect, useContext, useMemo, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../services/api';
@@ -16,7 +16,8 @@ const Home = () => {
   const [author, setAuthor] = useState('all');
   const [page, setPage] = useState(1);
   const [serverError, setServerError] = useState(null);
-  const postsPerPage = 6;
+  const postsPerPage = 3; // 3 items per page
+  const postsSectionRef = useRef(null); // Ref for scrolling to posts
 
   const defaultImage = 'https://via.placeholder.com/800x600?text=Image+Not+Found';
 
@@ -62,20 +63,11 @@ const Home = () => {
     );
   }, [posts, category, author, search]);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (
-        window.innerHeight + document.documentElement.scrollTop >=
-        document.documentElement.offsetHeight - 100 &&
-        !loading &&
-        filteredPosts.length > page * postsPerPage
-      ) {
-        setPage((prev) => prev + 1);
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [loading, filteredPosts.length, page]);
+  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+  const paginatedPosts = useMemo(() => {
+    const startIndex = (page - 1) * postsPerPage;
+    return filteredPosts.slice(startIndex, startIndex + postsPerPage);
+  }, [filteredPosts, page]);
 
   const handleDelete = async (id) => {
     try {
@@ -87,6 +79,9 @@ const Home = () => {
       await api.delete(`/posts/${id}`);
       setPosts(posts.filter((post) => post.id !== id));
       toast.success('Post deleted successfully ✅', { autoClose: 5000 });
+      if (paginatedPosts.length === 1 && page > 1) {
+        setPage(page - 1);
+      }
     } catch (error) {
       toast.error('Error deleting post 😞', { autoClose: 5000 });
       console.error(error);
@@ -142,9 +137,7 @@ const Home = () => {
     return ['all', ...validUsers.map((u) => u.id)];
   }, [posts, users]);
 
-  const paginatedPosts = filteredPosts.slice(0, page * postsPerPage);
-
-  const categories = ['all', 'Travel', 'Tech', 'Lifestyle', 'Food'];
+  const categories = ['all', 'Travel', 'Tech', 'Lifestyle', 'Food']; // Restored hardcoded categories
 
   const suggestions = useMemo(() => {
     const terms = posts.flatMap((post) => [
@@ -153,6 +146,15 @@ const Home = () => {
     ]);
     return [...new Set(terms.filter((term) => term.length > 2))].slice(0, 5);
   }, [posts]);
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+      if (postsSectionRef.current) {
+        postsSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  };
 
   if (serverError) {
     return (
@@ -242,7 +244,7 @@ const Home = () => {
           />
         </svg>
       </div>
-      <div className="container mx-auto p-6">
+      <div ref={postsSectionRef} className="container mx-auto p-6">
         <h2 className="text-4xl font-bold mb-8 text-center text-gradient font-poppins">
           Latest Stories 📚
         </h2>
@@ -334,9 +336,29 @@ const Home = () => {
             ))}
           </div>
         )}
-        {loading && (
-          <div className="text-center mt-8">
-            <span className="loading loading-spinner loading-lg text-primary"></span>
+        {totalPages > 1 && (
+          <div className="flex justify-center mt-8 gap-2">
+            <button
+              className={`btn btn-md rounded-full btn-warning text-white  ${page === 1 ? 'btn-disabled' : ''}`}
+              onClick={() => handlePageChange(page - 1)}
+            >
+              Previous
+            </button>
+            {[...Array(totalPages).keys()].map((i) => (
+              <button
+                key={i + 1}
+                className={`btn btn-md rounded-full ${page === i + 1 ? 'btn-primary' : 'btn-disabled'}`}
+                onClick={() => handlePageChange(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              className={`btn btn-md rounded-full btn-success text-white ${page === totalPages ? 'btn-disabled ' : ''}`}
+              onClick={() => handlePageChange(page + 1)}
+            >
+              Next
+            </button>
           </div>
         )}
       </div>

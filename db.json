@@ -34,6 +34,12 @@
           "content": "This is amazing. I liked it",
           "userId": "6ecf",
           "createdAt": "2025-06-10T22:01:04.812Z"
+        },
+        {
+          "id": "1749866609672",
+          "userId": "4690",
+          "text": "Very beautiful!! ",
+          "createdAt": "2025-06-14T02:03:29.672Z"
         }
       ]
     },
@@ -79,6 +85,42 @@
           "createdAt": "2025-06-11T00:18:42.424Z"
         }
       ]
+    },
+    {
+      "id": "67a8",
+      "title": "Burger Sandwich",
+      "description": "This is a very delicious burger",
+      "imageUrl": "https://i.ibb.co/6cmbSk12/burger.jpg",
+      "category": "Food",
+      "userId": "9f59",
+      "createdAt": "2025-06-13T18:39:51.737Z",
+      "updatedAt": "2025-06-13T18:39:51.737Z",
+      "likes": 0,
+      "comments": []
+    },
+    {
+      "id": "3222",
+      "title": "Cheese Pizza",
+      "description": "This is cheese pizza.",
+      "imageUrl": "https://i.ibb.co/QFpLJxWF/cheese-pizza-hero-2b-sq.webp",
+      "category": "Food",
+      "userId": "9f59",
+      "createdAt": "2025-06-13T18:41:22.015Z",
+      "updatedAt": "2025-06-13T18:41:22.015Z",
+      "likes": 0,
+      "comments": []
+    },
+    {
+      "id": "5697",
+      "title": "MacBook Pro 16",
+      "description": "Apple MacBook Pro 16\" 2019 2.4 GHz 8-Core Intel i9 32GB 2TB SSD + Warranty!",
+      "imageUrl": "https://i.ibb.co/9mSw9V5Q/Mac-Book-Pro-16.jpg",
+      "category": "Tech",
+      "userId": "4690",
+      "createdAt": "2025-06-14T01:30:07.840Z",
+      "updatedAt": "2025-06-14T01:30:07.840Z",
+      "likes": 0,
+      "comments": []
     }
   ],
   "users": [
@@ -130,6 +172,30 @@
       "username": "Basant",
       "email": "basantelsaey@gmail.com",
       "password": "basant123"
+    },
+    {
+      "id": "9f59",
+      "username": "Hazem",
+      "email": "hazemmohamed@gmail.com",
+      "password": "hazem123_H$",
+      "role": "user",
+      "createdAt": "2025-06-13T18:39:11.602Z"
+    },
+    {
+      "id": "4690",
+      "username": "habiba",
+      "email": "habibamohamed1@gmail.com",
+      "password": "habiba_H123$",
+      "role": "user",
+      "createdAt": "2025-06-14T01:26:52.224Z"
+    },
+    {
+      "id": "2443",
+      "username": "Nermeen",
+      "email": "nermeenmohamed@gmail.com",
+      "password": "nermeen123_N",
+      "role": "user",
+      "createdAt": "2025-06-14T03:27:25.323Z"
     }
   ]
 }
