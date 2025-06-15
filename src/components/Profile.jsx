@@ -10,24 +10,35 @@ import moment from 'moment';
 const Profile = () => {
   const { user, updateUser } = useContext(AuthContext);
   const [posts, setPosts] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showEditForm, setShowEditForm] = useState(false);
   const defaultImage = 'https://via.placeholder.com/800x600?text=Image+Not+Found';
 
   useEffect(() => {
     if (user) {
-      const fetchPosts = async () => {
+      const fetchData = async () => {
         try {
-          const response = await api.get(`/posts?userId=${user.id}`);
-          setPosts(response.data);
+          const [postsResponse, usersResponse] = await Promise.all([
+            api.get(`/posts?userId=${user.id}`),
+            api.get('/users'),
+          ]);
+          console.log('Users data:', usersResponse.data); 
+          if (!usersResponse.data || usersResponse.data.length === 0) {
+            console.warn('No users data received from API');
+            setUsers([]);
+          } else {
+            setUsers(usersResponse.data);
+          }
+          setPosts(postsResponse.data || []);
         } catch (error) {
-          toast.error('Error fetching posts 😞', { autoClose: 5000 });
-          console.error('Fetch posts error:', error);
+          toast.error('Error fetching data 😞', { autoClose: 10000 });
+          console.error('Fetch data error:', error);
         } finally {
           setLoading(false);
         }
       };
-      fetchPosts();
+      fetchData();
     }
   }, [user]);
 
@@ -52,6 +63,12 @@ const Profile = () => {
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
+    console.log('Submitting form with values:', values);
+    if (!user || !user.id) {
+      toast.error('User ID is missing. Please log in again 😞', { autoClose: 10000 });
+      setSubmitting(false);
+      return;
+    }
     try {
       const updatedUser = {
         ...user,
@@ -60,17 +77,18 @@ const Profile = () => {
         password: values.password || user.password,
         updatedAt: new Date().toISOString(),
       };
+      console.log('Sending update to API:', updatedUser);
       const response = await api.put(`/users/${user.id}`, updatedUser);
+      console.log('API Response:', response.data);
       if (!response.data || !response.data.id) {
         throw new Error('Invalid response from server');
       }
-      console.log('API response for update user:', response.data);
-      updateUser(response.data);
-      toast.success('Profile updated successfully! 🎉', { autoClose: 7000 });
+      updateUser(response.data); // تحديث الـ AuthContext
+      toast.success('Profile updated successfully! 🎉', { autoClose: 10000 });
       setShowEditForm(false);
     } catch (error) {
-      toast.error('Error updating profile 😞', { autoClose: 5000 });
-      console.error('Update profile error:', error);
+      console.error('Update error details:', error.response?.data || error.message);
+      toast.error(`Error updating profile 😞: ${error.message}`, { autoClose: 10000 });
     } finally {
       setSubmitting(false);
     }
@@ -80,98 +98,118 @@ const Profile = () => {
     try {
       await api.delete(`/posts/${id}`);
       setPosts(posts.filter((post) => post.id !== id));
-      toast.success('Post deleted successfully ✅', { autoClose: 5000 });
+      toast.success('Post deleted successfully ✅', { autoClose: 10000 });
     } catch (error) {
-      toast.error('Error deleting post 😞', { autoClose: 5000 });
+      toast.error('Error deleting post 😞', { autoClose: 10000 });
       console.error('Delete error:', error);
     }
   };
 
+  const getUsername = (userId) => {
+    if (!users.length) return `Unknown User (${userId})`;
+    const user = users.find((u) => u.id === userId);
+    if (!user) {
+      console.warn(`User with ID ${userId} not found in users list`);
+      return `Unknown User (${userId})`;
+    }
+    return user.username;
+  };
+
   if (!user) {
     return (
-      <div className="container mx-auto p-6 text-center">
-        <h2 className="text-xl font-bold text-error">Please log in to view your profile 😊</h2>
-        <Link to="/login" className="btn btn-primary mt-4 rounded-full">Login 🔐</Link>
+      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="bg-white backdrop-blur-lg rounded-3xl shadow-xl p-10 text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Please log in to view your profile 😊</h2>
+          <Link to="/login" className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-8 py-3 rounded-2xl font-semibold hover:shadow-lg transition-all">
+            Login 🔐
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 min-h-screen bg-base-100">
-      <div className="card bg-base-100 shadow-xl rounded-2xl p-8 glass max-w-4xl mx-auto animate-slide-up">
-        <div className="flex flex-col md:flex-row items-center gap-6 mb-8">
-          <div className="avatar">
-            <div className="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-              <img src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${user.username}`} alt="Profile" />
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-50 to-indigo-100 p-6">
+      <div className="max-w-6xl mx-auto space-y-8">
+        
+        {/* Profile Header */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl p-8">
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="relative">
+              <div className="w-28 h-28 rounded-full overflow-hidden ring-4 ring-purple-500/30 shadow-xl">
+                <img src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${getUsername(user.id)}`} alt="Profile" className="w-full h-full" />
+              </div>
             </div>
-          </div>
-          <div className="text-center md:text-left flex-1">
-            <h2 className="text-3xl font-extrabold text-gradient font-poppins">{user.username}</h2>
-            <p className="text-lg text-base-content/80">{user.email}</p>
-            <p className="text-sm text-base-content/60 capitalize">Role: {user.role}</p>
-            <p className="text-sm text-base-content/60">Joined: {new Date(user.createdAt).toLocaleDateString()}</p>
-            <button
-              onClick={() => setShowEditForm(!showEditForm)}
-              className="btn btn-primary btn-sm rounded-full mt-4 hover:scale-105 transition-transform"
-            >
-              {showEditForm ? 'Cancel 🚫' : 'Edit Profile ✏️'}
-            </button>
+            <div className="flex-1 text-center md:text-left">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+                {getUsername(user.id)}
+              </h1>
+              <p className="text-gray-600 text-lg mb-2">{user.email}</p>
+              <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
+                <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">{user.role}</span>
+                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                  Joined {new Date(user.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+              <button
+                onClick={() => setShowEditForm(!showEditForm)}
+                jsx={showEditForm ? 'true' : 'false'}
+                className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:shadow-lg transition-all"
+              >
+                {showEditForm ? 'Cancel ❌' : 'Edit Profile ✏️'}
+              </button>
+            </div>
           </div>
         </div>
 
+        {/* Edit Form */}
         {showEditForm && (
-          <div className="mt-8">
-            <h3 className="text-2xl font-bold mb-4 text-gradient font-poppins">Edit Profile 🌟</h3>
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl p-8">
+            <h3 className="text-2xl font-bold text-purple-800 mb-6">Edit Profile ✨</h3>
             <Formik
-              initialValues={{
-                username: user.username,
-                email: user.email,
-                password: '',
-              }}
+              initialValues={{ username: user.username, email: user.email, password: '' }}
               validationSchema={validationSchema}
               onSubmit={handleSubmit}
             >
               {({ isSubmitting }) => (
                 <Form className="space-y-6">
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text">Username 👤</span>
-                    </label>
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Username 👤</label>
                     <Field
                       type="text"
                       name="username"
-                      className="input input-bordered w-full rounded-full focus:ring-2 focus:ring-primary"
-                      placeholder="Enter username... 👤"
+                      className="w-full px-4 py-3 bg-white/70 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="Enter username..."
                     />
-                    <ErrorMessage name="username" component="div" className="text-error text-sm mt-1" />
+                    <ErrorMessage name="username" component="div" className="text-red-500 text-sm mt-1" />
                   </div>
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text">Email ✉️</span>
-                    </label>
+
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Email ✉️</label>
                     <Field
                       type="email"
                       name="email"
-                      className="input input-bordered w-full rounded-full focus:ring-2 focus:ring-primary"
-                      placeholder="Enter email... ✉️"
+                      className="w-full px-4 py-3 bg-white/70 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="Enter email..."
                     />
-                    <ErrorMessage name="email" component="div" className="text-error text-sm mt-1" />
+                    <ErrorMessage name="email" component="div" className="text-red-500 text-sm mt-1" />
                   </div>
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text">Password 🔒 (Leave blank to keep current)</span>
-                    </label>
+
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Password 🔒 (Leave blank to keep current)</label>
                     <Field
                       type="password"
                       name="password"
-                      className="input input-bordered w-full rounded-full focus:ring-2 focus:ring-primary"
-                      placeholder="Enter new password... 🔒"
+                      className="w-full px-4 py-3 bg-white/70 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="Enter new password..."
                     />
-                    <ErrorMessage name="password" component="div" className="text-error text-sm mt-1" />
+                    <ErrorMessage name="password" component="div" className="text-red-500 text-sm mt-1" />
                   </div>
+
                   <button
                     type="submit"
-                    className="btn btn-primary w-full rounded-full hover:scale-105 transition-transform"
+                    jsx={isSubmitting ? 'true' : 'false'}
+                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white py-3 rounded-2xl font-semibold hover:shadow-lg transition-all disabled:opacity-50"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? 'Saving...' : 'Save Changes 🚀'}
@@ -182,53 +220,53 @@ const Profile = () => {
           </div>
         )}
 
-        <div className="mt-8">
-          <h3 className="text-2xl font-bold mb-6 text-gradient font-poppins">Your Posts 📝</h3>
+        {/* Posts Section */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl p-8">
+          <h3 className="text-2xl font-bold text-purple-800 mb-6">Your Posts 📝</h3>
+          
           {loading ? (
-            <div className="text-center">
-              <span className="loading loading-spinner loading-lg text-primary"></span>
+            <div className="text-center py-12">
+              <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto"></div>
             </div>
           ) : posts.length === 0 ? (
-            <p className="text-lg text-base-content/70 text-center">
-              You haven't created any posts yet.{' '}
-              <Link to="/add-post" className="text-primary hover:underline">Create one now! 🚀</Link>
-            </p>
+            <div className="text-center py-12">
+              <p className="text-gray-600 text-lg mb-6">You haven't created any posts yet.</p>
+              <Link 
+                to="/add-post" 
+                className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:shadow-lg transition-all"
+              >
+                Create Your First Post 🚀
+              </Link>
+            </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {posts.map((post) => (
-                <div
-                  key={post.id}
-                  className="card bg-base-100 shadow-md rounded-2xl p-4 hover:shadow-xl transition-all duration-300"
-                >
-                  <figure>
-                    <img
-                      src={post.imageUrl || defaultImage}
-                      alt={post.title}
-                      className="w-full h-48 object-cover rounded-t-lg"
-                      onError={(e) => (e.target.src = defaultImage)}
-                    />
-                  </figure>
-                  <div className="card-body p-4">
-                    <Link
-                      to={`/post/${post.id}`}
-                      className="card-title text-xl font-semibold hover:text-primary font-poppins"
-                    >
+                <div key={post.id} className="bg-white/70 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all">
+                  <img
+                    src={post.imageUrl || defaultImage}
+                    alt={post.title}
+                    className="w-full h-48 object-cover"
+                    onError={(e) => (e.target.src = defaultImage)}
+                  />
+                  <div className="p-6">
+                    <Link to={`/post/${post.id}`} className="text-xl font-bold text-gray-800 hover:text-purple-600 transition-colors block mb-3">
                       {post.title} 🌟
                     </Link>
-                    <p className="text-base-content/70 line-clamp-2">{post.description}</p>
-                    <p className="text-sm text-base-content/60">
-                      Posted: {moment(post.createdAt).format('MMM D, YYYY')} 📅
+                    <p className="text-gray-600 mb-4 line-clamp-2">{post.description}</p>
+                    <p className="text-sm text-gray-500 mb-4">
+                      📅 {moment(post.createdAt).format('MMM D, YYYY')}
                     </p>
-                    <div className="card-actions justify-end mt-4">
+                    <div className="flex gap-3">
                       <Link
                         to={`/edit-post/${post.id}`}
-                        className="btn btn-warning btn-sm rounded-full hover:scale-105 transition-transform"
+                        className="flex-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white py-2 px-4 rounded-xl text-center font-medium hover:shadow-lg transition-all"
                       >
                         Edit ✏️
                       </Link>
                       <button
                         onClick={() => handleDelete(post.id)}
-                        className="btn btn-error btn-sm rounded-full hover:scale-105 transition-transform"
+                        jsx={post.id ? 'true' : 'false'}
+                        className="flex-1 bg-gradient-to-r from-red-400 to-pink-500 text-white py-2 px-4 rounded-xl font-medium hover:shadow-lg transition-all"
                       >
                         Delete 🗑️
                       </button>
@@ -240,6 +278,15 @@ const Profile = () => {
           )}
         </div>
       </div>
+
+      <style jsx="true">{`
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+      `}</style>
     </div>
   );
 };
