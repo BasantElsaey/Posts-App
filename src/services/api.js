@@ -2,7 +2,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: process.env.API_PRODUCTION_KEY || 'http://localhost:3000' 
 });
 
 api.interceptors.request.use(

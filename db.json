@@ -257,6 +257,14 @@
       "password": "mohamedahmed1234_M",
       "role": "user",
       "createdAt": "2025-06-15T18:52:22.491Z"
+    },
+    {
+      "id": "3a83",
+      "username": "Nairaaa",
+      "email": "naira12@gmail.com",
+      "password": "nairaa123_N",
+      "role": "user",
+      "createdAt": "2025-06-15T23:52:47.553Z"
     }
   ]
 }
